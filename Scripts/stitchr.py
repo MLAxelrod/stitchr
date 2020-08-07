@@ -134,6 +134,12 @@ def stitch(specific_args, locus, tcr_info, functionality, codon_dict):
     n_term_nt, n_term_aa = fxn.tidy_n_term(done['l'] + done['v'])
     c_term_nt, c_term_aa = fxn.tidy_c_term(done['j'] + done['c'], locus, specific_args['species'])
 
+    assert done['j'][j_range[0]:j_range[1]] + done['c'][c_range[0]:c_range[1]] == c_term_nt
+    
+    print('The C gene is the last {} nt'.format(c_range[1] - c_range[0]))
+    print('>Constant gene nt')
+    print(done['c'][c_range[0]:c_range[1]])
+
     # Then figure out where the CDR3 will slot in - look at the CDR3 edges to see how much overlap needs to be removed
     # Start with 4 residues chunks, move from end of V gene up to 10 residues in (very generous deletion allowance)
     n_term_nt_trimmed, cdr3_n_offset = fxn.determine_v_interface(specific_args['cdr3'], n_term_nt, n_term_aa)

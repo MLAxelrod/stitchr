@@ -233,7 +233,7 @@ def tidy_n_term(n_term_nt):
     return trimmed, translate_nt(trimmed)
 
 
-def tidy_c_term(c_term_nt, chain, species):
+def tidy_c_term(j, c, chain, species):
     """
     Tidy up the germline C-terminal half (i.e. post-CDR3, J+C) of the nt seq so that it's the right frame/trimmed
     :param c_term_nt: done['j'] + done['c']
@@ -241,6 +241,8 @@ def tidy_c_term(c_term_nt, chain, species):
     :param species: human or mouse
     :return: c_term_nt trimmed/in right frame
     """
+    
+    c_term_nt = j + c
 
     c_aa = {'HUMAN': {'trac': "IQNPDPA", 'trbc1': "DLKNVF", 'trbc2': "DLNKVF", 'trac-stop': '*DLQDCK'},
             'MOUSE': {'trac': "IQNPEPA", 'trbc1': "DLRNVT", 'trbc2': "DLRNVT", 'trac-stop': '*GLQD'}}
@@ -255,15 +257,27 @@ def tidy_c_term(c_term_nt, chain, species):
         if chain == 'TRA':
             if c_aa[species]['trac'] in translated:
                 stop_index_aa = translated.index(c_aa[species]['trac-stop'])  # Account for late exon TRAC stop codons
+                assert stop_index_aa > len(j)
                 c_term_nt = c_term_nt[:stop_index_aa * 3]
                 translated = translate_nt(c_term_nt[f:])
+                start = f
+                assert len(c_term_nt) == stop_index_aa * 3
+                stop = stop_index_aa * 3
                 break
 
         elif chain == 'TRB':
             if c_aa[species]['trbc1'] in translated or c_aa[species]['trbc2'] in translated:
+                start = f
+                stop = len(c_term_nt)
                 break
 
-    return c_term_nt[f:], translated
+    sequence_out = c_term_nt[f:]
+    assert len(j) > start
+    assert len(sequence_out) > len(j)
+    j_range = (start, len(j))
+    c_range = (0, stop - len(j))
+    
+    return j_range, c_range, sequence_out, translated
 
 
 def determine_v_interface(cdr3aa, n_term_nuc, n_term_amino):
