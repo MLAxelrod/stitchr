@@ -130,9 +130,14 @@ def stitch(specific_args, locus, tcr_info, functionality, codon_dict):
         raise ValueError("Error: CDR3 provided does not end with the expected residue for this J gene (" +
                     j_residue_exceptions[used_alleles['j']] + "). Deletion this far in to the J is extremely unlikely. ")
 
+    if specific_args['c'].startswith('MTR'):
+        c_species = 'MOUSE'
+    else:
+        c_species = specific_args['species']
+
     # Get the germline encoded bits
     n_term_nt, n_term_aa = fxn.tidy_n_term(done['l'] + done['v'])
-    c_term_nt, c_term_aa = fxn.tidy_c_term(done['j'] + done['c'], locus, specific_args['species'])
+    j_range, c_range, c_term_nt, c_term_aa = fxn.tidy_c_term(done['j'], done['c'], locus, c_species)
 
     assert done['j'][j_range[0]:j_range[1]] + done['c'][c_range[0]:c_range[1]] == c_term_nt
     
